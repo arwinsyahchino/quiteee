@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kuis Kesehatan Gigi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    .option {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    .option:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        border-color: #8b5cf6;
+    }
+    .option.selected {
+        background-color: #8b5cf6 !important;
+        color: white !important;
+        border-color: #8b5cf6;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 to-blue-200 min-h-screen flex items-center justify-center p-6">
+  <audio id="correct-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_10e47c996f.mp3?filename=correct-answer-2-6295.mp3"></audio>
+  <audio id="wrong-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c59a0fcf72.mp3?filename=wrong-answer-126515.mp3"></audio>
+
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6">
+    <div class="bg-indigo-700 text-white rounded-t-2xl p-6">
+      <h1 class="text-3xl font-bold text-center"><i class="fas fa-tooth mr-2"></i>Kuis Kesehatan Gigi Level 1</h1>
+      <div class="flex justify-between mt-4 text-sm">
+        <div><i class="fas fa-question-circle"></i> Pertanyaan <span id="current-question">1</span>/<span id="total-questions">10</span></div>
+        <div><i class="fas fa-star"></i> Skor: <span id="score">0</span></div>
+      </div>
+      <div class="w-full h-2 bg-indigo-300 rounded-full mt-4">
+        <div id="progress-bar" class="h-full bg-yellow-400 rounded-full transition-all duration-500" style="width: 10%"></div>
+      </div>
+    </div>
+
+    <div class="p-6">
+      <h2 id="question" class="text-xl font-semibold text-gray-700 mb-4">🦷 Memuat pertanyaan...</h2>
+      <div id="options" class="grid gap-4"></div>
+      <div id="explanation" class="text-sm text-gray-600 mt-4 italic"></div>
+      <div class="flex justify-end mt-8">
+        <button id="next-btn" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-6 rounded-2xl shadow transition-transform transform hover:scale-105">
+          <i class="fas fa-arrow-right mr-2"></i>Selanjutnya
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const correctSound = document.getElementById("correct-sound");
+    const wrongSound = document.getElementById("wrong-sound");
+
+    const questions = [
+      { question: "🦷 Berapa kali idealnya seseorang menyikat gigi dalam sehari?", options: ["Sekali, sebelum tidur", "Tiga kali, setelah makan", "Dua kali, pagi setelah sarapan dan malam sebelum tidur", "Setiap kali merasa gigi kotor"], correctAnswer: 2, explanation: "Menyikat gigi dua kali sehari (pagi dan malam) adalah rekomendasi dari dokter gigi." },
+      { question: "🦷 Apa manfaat utama dari kandungan fluoride dalam pasta gigi?", options: ["Membuat gigi lebih putih", "Mencegah gigi berlubang", "Menghilangkan bau mulut", "Memutihkan gusi"], correctAnswer: 1, explanation: "Fluoride membantu memperkuat enamel gigi dan mencegah kerusakan gigi." },
+      { question: "🦷 Kapan waktu terbaik untuk mengganti sikat gigi?", options: ["Jika warnanya berubah", "Setelah enam bulan", "Jika rusak atau setiap 3 bulan", "Saat pasta gigi habis"], correctAnswer: 2, explanation: "Ganti sikat gigi setiap 3 bulan atau jika bulu-bulunya sudah rusak." },
+      { question: "🦷 Apa yang sebaiknya digunakan untuk membersihkan sisa makanan di sela-sela gigi?", options: ["Tusuk gigi", "Benang gigi (dental floss)", "Kapas", "Kertas tisu"], correctAnswer: 1, explanation: "Benang gigi lebih aman dan efektif daripada tusuk gigi." },
+      { question: "🦷 Seberapa sering disarankan konsultasi ke dokter gigi meskipun tidak sakit gigi?", options: ["Sekali setahun", "Setiap bulan", "Setiap 6 bulan", "Saat ada keluhan saja"], correctAnswer: 2, explanation: "Disarankan konsultasi ke dokter gigi setiap 6 bulan sekali." },
+      { question: "🦷 Mengapa seseorang yang giginya bersih cenderung lebih percaya diri?", options: ["Karena terlihat kaya", "Karena tidak takut ke dokter", "Karena senyum terlihat lebih sehat dan menarik", "Karena tidak perlu menyikat gigi lagi"], correctAnswer: 2, explanation: "Gigi bersih memperkuat kesan senyum sehat dan menarik." },
+      { question: "🦷 Apa keuntungan belajar melalui aplikasi edukasi digital seperti Quitee?", options: ["Bisa bermain sambil belajar", "Bisa menghindari tugas sekolah", "Tidak perlu sikat gigi lagi", "Bisa menggantikan dokter gigi"], correctAnswer: 0, explanation: "Belajar sambil bermain membuat edukasi lebih menyenangkan." },
+      { question: "🦷 Apa akibat dari tidak rutin menyikat gigi?", options: ["Gigi menjadi lebih putih", "Napas menjadi lebih segar", "Timbul plak dan gigi berlubang", "Gusi menjadi lebih kuat"], correctAnswer: 2, explanation: "Plak dapat menyebabkan gigi berlubang jika tidak dibersihkan." },
+      { question: "🦷 Apa yang bisa menyebabkan bau mulut?", options: ["Makan sayur terlalu banyak", "Gigi tidak dibersihkan secara teratur", "Terlalu sering berkumur", "Terlalu banyak berbicara"], correctAnswer: 1, explanation: "Bakteri dari sisa makanan yang menumpuk bisa sebabkan bau mulut." },
+      { question: "🦷 Merokok dalam jangka panjang dapat menyebabkan…", options: ["Kerusakan tulang", "Kanker rongga mulut", "Gatal pada gusi", "Bau wangi pada napas"], correctAnswer: 1, explanation: "Merokok meningkatkan risiko kanker mulut dan masalah gigi lainnya." }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let selectedOptions = Array(questions.length).fill(null);
+
+    const questionElement = document.getElementById("question");
+    const optionsElement = document.getElementById("options");
+    const scoreElement = document.getElementById("score");
+    const currentQuestionElement = document.getElementById("current-question");
+    const totalQuestionsElement = document.getElementById("total-questions");
+    const progressBar = document.getElementById("progress-bar");
+    const nextButton = document.getElementById("next-btn");
+    const explanationElement = document.getElementById("explanation");
+
+    function updateQuizInfo() {
+      currentQuestionElement.textContent = currentQuestionIndex + 1;
+      totalQuestionsElement.textContent = questions.length;
+      scoreElement.textContent = score;
+      progressBar.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+      nextButton.textContent = currentQuestionIndex < questions.length - 1 ? 'Selanjutnya' : 'Selesai';
+    }
+
+    function showQuestion() {
+      const question = questions[currentQuestionIndex];
+      questionElement.textContent = question.question;
+      optionsElement.innerHTML = "";
+      explanationElement.textContent = "";
+
+      question.options.forEach((opt, i) => {
+        const div = document.createElement("div");
+        div.className = "option bg-gray-100 p-4 rounded-lg cursor-pointer";
+        div.textContent = opt;
+        div.setAttribute("data-index", i);
+        div.addEventListener("click", () => selectOption(i));
+        optionsElement.appendChild(div);
+      });
+    }
+
+    function selectOption(index) {
+      const optionElements = document.querySelectorAll('.option');
+      optionElements.forEach(el => el.classList.remove('selected'));
+      const selected = [...optionElements].find(el => el.getAttribute("data-index") == index);
+      if (selected) selected.classList.add("selected");
+      selectedOptions[currentQuestionIndex] = index;
+    }
+
+    function loadNextQuestion() {
+      if (selectedOptions[currentQuestionIndex] === null) {
+        alert('Silakan pilih jawaban terlebih dahulu!');
+        return;
+      }
+
+      const question = questions[currentQuestionIndex];
+      const userAnswer = selectedOptions[currentQuestionIndex];
+      const isCorrect = userAnswer === question.correctAnswer;
+      explanationElement.textContent = `💡 ${question.explanation}`;
+
+      if (isCorrect) {
+        score += 1;
+        correctSound.play();
+      } else {
+        wrongSound.play();
+      }
+      scoreElement.textContent = score;
+
+      setTimeout(() => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+          updateQuizInfo();
+          showQuestion();
+        } else {
+          questionElement.textContent = "Kuis selesai!";
+          optionsElement.innerHTML = "";
+          explanationElement.textContent = "";
+
+          const actionBtn = document.createElement('button');
+          actionBtn.className = "mt-4 px-6 py-3 text-white font-semibold rounded-xl transition hover:scale-105 shadow text-lg";
+
+          if (score >= 10) {
+              actionBtn.textContent = "Lanjut ke Level 2";
+              actionBtn.classList.add("bg-green-500", "hover:bg-green-600");
+              actionBtn.onclick = () => window.location.href = "kuis_level2.html";
+          } else {
+              actionBtn.textContent = "Ulangi Kuis";
+              actionBtn.classList.add("bg-red-500", "hover:bg-red-600");
+              actionBtn.onclick = () => window.location.reload();
+          }
+
+          optionsElement.appendChild(actionBtn);
+        }
+      }, 2500);
+    }
+
+    nextButton.addEventListener("click", loadNextQuestion);
+    document.addEventListener("DOMContentLoaded", () => {
+      updateQuizInfo();
+      showQuestion();
+    });
+  </script>
+<div id="warning-modal" style="
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: white;
+  padding: 30px;
+  text-align: center;
+  font-size: 20px;
+  flex-direction: column;
+">
+  <div>
+    Main Handphone harus dapat izin orang tua yaaa!!!<br>
+    Harus menggunakan game hanya 15-30 menit saja untuk menghindari kerusakan atau kelelahan mata.
+  </div>
+  <button onclick="document.getElementById('warning-modal').style.display='none'" style="
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #2563eb;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  ">Saya Mengerti</button>
+</div>
+
+</body>
+</html>

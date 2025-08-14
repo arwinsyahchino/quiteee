@@ -1,0 +1,32 @@
+<div id="warning-modal" style="
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: white;
+  padding: 30px;
+  text-align: center;
+  font-size: 20px;
+  flex-direction: column;
+">
+  <div>
+    Main Handphone harus dapat izin orang tua yaaa!!!<br>
+    Harus menggunakan game hanya 15-30 menit saja untuk menghindari kerusakan atau kelelahan mata.
+  </div>
+  <button onclick="document.getElementById('warning-modal').style.display='none'" style="
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #2563eb;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  ">Saya Mengerti</button>
+</div>

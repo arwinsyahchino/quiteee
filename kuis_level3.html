@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Game Kuis Bola Basket - Responsif</title>
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  :root {
+    --base-font-size: 16px;
+    --heading-scale: 2;
+    --padding-scale: 1;
+    --ring-width: 280px;
+    --ring-height: 210px;
+    --ball-size: 80px;
+  }
+  
+  @media (max-width: 1024px) {
+    :root {
+      --ring-width: 260px;
+      --ring-height: 195px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    :root {
+      --base-font-size: 14px;
+      --heading-scale: 1.6;
+      --padding-scale: 0.8;
+      --ring-width: 220px;
+      --ring-height: 170px;
+      --ball-size: 72px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    :root {
+      --base-font-size: 12px;
+      --heading-scale: 1.3;
+      --padding-scale: 0.6;
+      --ring-width: 200px;
+      --ring-height: 160px;
+      --ball-size: 64px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    :root {
+      --ring-width: 180px;
+      --ring-height: 135px;
+      --ball-size: 48px;
+    }
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0d47a1, #1976d2);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: calc(20px * var(--padding-scale));
+    overflow-x: hidden;
+    font-size: var(--base-font-size);
+  }
+  
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 极;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="0" y="0" width="100" height="100" fill="none" stroke="%23FFFFFF20" stroke-width="1"/></svg>');
+    background-size: 40px 40px;
+    opacity: 0.3;
+    z-index: -1;
+    animation: bgMove 60s linear infinite;
+  }
+  
+  @keyframes bgMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 100px 100px; }
+  }
+
+  h1 {
+    font-size: calc(3rem * var(--heading-scale) / 2);
+    font-weight: 900;
+    margin-bottom: calc(16px * var(--padding-scale));
+    background: linear-gradient(90deg, #ff6d00 0%, #ffb300 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    user-select: none;
+    text-align: center;
+    position: relative;
+    animation: titleFadeIn 1s ease-out;
+    text-shadow: 0 2px 10px rgba(255, 153, 0, 0.3);
+    word-break: break-word;
+    line-height: 1.2;
+  }
+  
+  @keyframes titleFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h1::after {
+    content: "";
+    display: block;
+    width: 100px;
+    height: 4px;
+    background: linear-gradient极0deg, #ff6d00 0%, #ffb300 100%);
+    margin: 10px auto 0;
+    border-radius: 4px;
+    opacity: 0.7;
+    animation: lineGrow 1s 0.5s both;
+  }
+  
+  @keyframes lineGrow {
+    from { width: 0; opacity: 0; }
+    to { width: 100px; opacity: 0.7; }
+  }
+
+  #timer {
+    font-size: calc(1.6rem * var(--heading-scale) / 2);
+    font-weight: 700;
+    color: #ffcc00;
+    margin-bottom: calc(16px * var(--padding-scale));
+    font-family: monospace;
+    text-shadow: 0 0 8px rgba(255, 204, 0, 0.5);
+    animation: pulse 1.5s infinite alternate;
+  }
+  
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+  }
+
+  #quiz-container {
+    background: rgba(0,0,0,0.5);
+    border-radius: calc(20px * var(--padding-scale));
+    padding: calc(32px * var(--padding-scale)) calc(24px * var(--padding-scale));
+    max-width: min(640px, 90vw);
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(255, 152, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+  }
+  
+  #quiz-container::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border: 2px solid rgba(255, 204, 0, 0.3);
+    border-radius: 25px;
+    animation: pulseBorder 2.5s infinite;
+    pointer-events: none;
+    z-index: -1;
+  }
+  
+  @keyframes pulseBorder {
+    0% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(1.02); }
+    100% { opacity: 0.7; transform: scale(1); }
+  }
+
+  #pertanyaan {
+    font-size: calc(1.6rem * var(--heading-scale) / 2);
+    font-weight: 600;
+    margin-bottom: calc(40px * var(--padding-scale));
+    text-align: center;
+    min-height: calc(80px * var(--padding-scale));
+    line-height: 1.3;
+    position: relative;
+    transition: all 0.极缓;
+    opacity: 0.5;
+  }
+  
+  #pertanyaan::before,
+  #pertanyaan::after {
+    content: '"';
+    font-size: calc(2rem * var(--heading-scale) / 2);
+    color: #ffb300;
+    position: absolute;
+    opacity: 0.5;
+  }
+  
+  #pertanyaan::before {
+    top: -10px;
+    left: -15px;
+  }
+  
+  #pertanyaan::after {
+    bottom: -15px;
+    right: -15px;
+  }
+
+  #ring-basket {
+    position: relative;
+    width: var(--ring-width);
+    height: var(--ring-height);
+    margin-bottom: calc(48px * var(--padding-scale));
+    perspective: 800px;
+    transform-style: preserve-3d;
+    animation: float 4s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  #ring-basket .backboard {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: calc(var(--ring-width) - 30px);
+    height: 30px;
+    background: #ffa726;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 0 20px #fb8c00;
+    z-index: 10;
+    transform-style: preserve-3d;
+  }
+  
+  #ring-basket .ring {
+    position: absolute;
+    top: 40px; left: 50%;
+    transform: translateX(-50%);
+    width: calc(var(--ring-width) - 50px);
+    height: 85px;
+    border: 6px solid #ffb300;
+    border-radius: 120px / 42px;
+    box-shadow: 
+      0 0 15px #ffb300cc,
+      0 0 30px rgba(255, 179, 0, 0.3);
+    background: radial-gradient(ellipse at center, #ffe082cc 40%, transparent 100%);
+    z-index: 20;
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+  }
+
+  #ring-basket.impact .ring {
+    animation: netDownUp 0.7s ease forwards, netShake 0.7s ease-in-out forwards;
+  }
+  
+  @keyframes netDownUp {
+    0% { transform: translateX(-50%) translateZ(0) translateY(0); }
+    40% { transform: translateX(-50%) translateZ(-30px) translateY(12px); }
+    100% { transform: translateX(-50%) translateZ(0) translateY(0); }
+  }
+  
+  @keyframes netShake {
+    0%20% { transform: translateX(-50%) rotateX(0) rotateY(0); }
+    25% { transform: translateX(-50%) rotateX(-5deg) rotateY(-2deg); }
+    50% { transform: translateX(-50%) rotateX(5deg) rotateY(2deg); }
+    似% { transform: translateX(-50%) rotateX(-3deg) rotateY(0); }
+  }
+
+  .confetti {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #ff0;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+    animation: 
+      confettiFall linear forwards,
+      confettiFade 1.5s ease-out forwards;
+  }
+  
+  @keyframes confettiFall {
+    to { transform: translateY(100vh) rotate(720deg); }
+  }
+  
+  @keyframes confettiFade {
+    0%, 80% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  #pilihan-jawaban {
+    display: flex;
+    justify-content: center;
+    gap: calc(24px * var(--padding-scale));
+    flex-wrap: wrap;
+    max-width: 640px;
+    user-select: none;
+    perspective: 800px;
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .pilihan-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: calc(100px * var(--padding-scale));
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+    animation: fadeInItem 0.5s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+    margin: 10px;
+  }
+  
+  .pilihan-item:nth-child(1) { animation-delay: 0.1s; }
+  .pilihan-item:nth-child(2) { animation-delay: 0.2s; }
+  .pilihan-item:nth-child(3) { animation-delay: 0.3s; }
+  .pilihan-item:nth-child(4) { animation-delay: 0.4s; }
+  
+  @keyframes fadeInItem {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .pilihan-item:hover {
+    transform: translateY(-5px) scale(1.05);
+    filter: brightness(1.1);
+  }
+
+  .bola-label-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+  
+  .bola {
+    background: radial-gradient(circle at center, #ff7043, #bf360c);
+    width: var(--ball-size);
+    height: var(--ball-size);
+    border-radius: 50%;
+    box-shadow: 
+      inset 0 0 8px #ffab40, 
+      0 6px 14px rgba(0, 0, 0, 0.4),
+      0 0 15px rgba(255, 107, 0, 0.6);
+    border: 3px solid #ffcc80;
+    font-weight: 700;
+    font-size: calc(1.1rem * var(--heading-scale) / 2);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    pointer-events: none;
+    transition:
+      box-shadow 0.3s ease,
+      filter 0.3s ease;
+    filter: drop-shadow(0 6px 4px rgba(0,0,0,0.7));
+    animation: ballSpin 4s linear infinite;
+  }
+  
+  .bola::after {
+    content: "";
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;极    height: 80%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%);
+  }
+  
+  @keyframes ballSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .label-jawaban {
+    margin-top: 10px;
+    text-align: center;
+    font-size: calc(0.9rem * var(--heading-scale) / 2);
+    color: white;
+    width: 100%;
+    word-break: break-word;
+  }
+
+  .pilihan-item.wrong-answer .bola {
+    animation: wrongShake 0.4s ease;
+  }
+
+  @keyframes wrongShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+  }
+
+  .pilihan-item.correct-answer .bola {
+    animation: correctPulse 0.5s ease 2, flash 0.5s ease;
+  }
+
+  @keyframes correctPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  @keyframes flash {
+    0% { box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.5); }
+    100% { box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0); }
+  }
+
+  #hasil {
+    margin-top: calc(20px * var(--padding-scale));
+    font-size: calc(2.4rem * var(--heading-scale) / 2);
+    font-weight: 900;
+    text-align: center;
+    min-height: calc(54px * var(--padding-scale));
+    color: #fff;
+    letter-spacing: 3px;
+    user-select: none;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.4s ease;
+    text-shadow: 0 0 12px;
+    position: relative;
+  }
+  
+  #hasil.hore {
+    color: #81c784;
+    text-shadow: 0 0 20px #388e3c;
+    opacity: 1;
+    transform: scale(1);
+    animation: 
+      pulseScale 1.2s ease infinite,
+      colorChange 2s linear infinite;
+  }
+  
+  @keyframes colorChange {
+    0% { text-shadow: 0 0 20px #388e3c; }
+    50% { text-shadow: 0 0 30px #81c784; }
+    100% { text-shadow: 0 0 20px #388e3c; }
+  }
+
+  @keyframes wrongJump {
+    0%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-20px); }
+    50% { transform: translateY(0); }
+    70% { transform: translateY(-10px); }
+  }
+  
+  .huuu-effect {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 0, 0, 0.2);
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0;
+    animation: huuuFade 1.5s ease-out;
+  }
+  
+  @keyframes huuuFade {
+    0% { opacity: 0.7; }
+    70% { opacity: 0.4; }
+    100% { opacity: 0; }
+  }
+  
+  #pesan-salah {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 5rem;
+    font-weight: 900;
+    color: #ff3d00;
+    text-shadow: 极 0 20px #ff1744;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    animation: huuuText 1.5s ease-out;
+  }
+  
+  @keyframe稍 huuuText {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    20% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+  }
+
+  #btn-restart {
+    display: none;
+    background: linear-gradient(135deg, #ff6d00, #ffb300);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.5);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  #btn-restart:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.7);
+  }
+  
+  #btn-restart:active {
+    transform: translateY(1px);
+  }
+  
+  #btn-restart::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  #btn-restart:hover::after {
+    transform: translateX(100%);
+  }
+
+  #btn-index {
+    display: none;
+    background: linear-gradient(135deg, #4a148c, #7b1fa2);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(123, 31, 162, 0.5);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #btn-index:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(123, 31, 162, 0.7);
+  }
+
+  #btn-index::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  #btn-index:hover::after {
+    transform: translateX(100%);
+  }
+
+  .button-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .score-container {
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    max-width: 500px;
+    margin: 20px auto;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  .score-title {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: #ffcc00;
+  }
+  
+  .score-value {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 20px 0;
+    color: #ffffff;
+  }
+  
+  .score-message {
+    font-size: 1.5rem;
+    margin: 20px 0;
+  }
+  
+  .pass {
+    color: #4caf50;
+  }
+  
+  .fail {
+    color: #f44336;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulseScale {
+    0%, 100% {transform: scale(1);}
+    50% {transform: scale(1.05);}
+  }
+
+  /* Deteksi orientasi portrait/landscape */
+  @media (orientation: portrait) {
+    #orientation-warning {
+      display: none;
+    }
+  }
+  
+  @media (orientation: landscape) and (max-height: 500px) {
+    #orientation-warning {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      text-align: center;
+      padding: 10px;
+      z-index: 1000;
+    }
+
+    #quiz-container {
+      max-width: 100%;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      grid-gap: 10px;
+      align-items: center;
+      height: auto;
+      margin-top: 10px;
+    }
+    
+    #pertanyaan {
+      grid-column: 1 / -1;
+      font-size: 1rem;
+      margin-bottom: 0;
+      min-height: auto;
+    }
+    
+    #ring-basket {
+      width: 180px;
+      height: 135px;
+      margin: 0 auto;
+      grid-row: 2;
+      justify-self: center;
+    }
+    
+    #pilihan-jawaban {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-gap: 8px;
+      grid-row: 2;
+      align-self: start;
+      margin-top: 20px;
+    }
+    
+    #hasil {
+      grid-column: 1 / -1;
+      margin-top: 8px;
+      font-size: 1.5rem;
+    }
+    
+    .pilihan-item {
+      width: 100%;
+      margin: 5px 0;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    
+    .bola {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+    }
+    
+    .label-jawaban {
+      text-align: left;
+      flex: 1;
+    }
+
+    .button-container {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .score-container {
+      padding: 15px;
+      margin: 10px;
+    }
+    
+    .score-title {
+      font-size: 1.5rem;
+    }
+    
+    .score-value {
+      font-size: 2rem;
+    }
+    
+    .score-message {
+      font-size: 1.2rem;
+    }
+  }
+
+#hasil.huuu {
+  opacity: 1;
+  transform: scale(1);
+  color: #f44336;
+  animation: pulseScale 1.2s ease infinite;
+}
+</style>
+</head>
+<body>
+  <div id="orientation-warning" style="display: none;">
+    Untuk pengalaman terbaik, putar perangkat Anda ke mode portrait
+  </div>
+  
+  <h1>Kuis Game Basket Level 3</h1>
+  <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Timer waktu menjawab pertanyaan"></div>
+  <main id="quiz-container" role="main" aria-live="polite" aria-atomic="true">
+    <section id="pertanyaan" tabindex="0" aria-label="Pertanyaan kuis">Memuat pertanyaan...</section>
+    <section id="ring-basket" aria-label="Ring basket tujuan lempar bola">
+      <div class="backboard" aria-hidden="true"></div>
+      <div class="ring" aria-hidden="true"></div>
+      <div id="zone-drop" aria-hidden="true"></div>
+    </section>
+    <section id="pilihan-jawaban" aria-label="Pilihan jawaban bola basket" role="list">
+      <!-- Bola pilihan akan muncul di sini -->
+    </section>
+    <section id="hasil" aria-live="assertive" aria-atomic="true"></section>
+    <div class="button-container">
+      <button id="btn-restart" aria-label="Mulai ulang kuis">Main Lagi</button>
+      <button id="btn-index" aria-label="Kembali ke halaman utama">Ke Halaman Utama</button>
+    </div>
+  </main>
+
+  <!-- Tambahkan elemen untuk efek jawaban salah -->
+  <div id="huuu-effect" class="huuu-effect" style="display: none;"></div>
+  <div id="pesan-salah" style="display: none;">Huuuuu!!!!</div>
+
+<audio id="sound-correct" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2761/2761-preview.mp3"></audio>
+<audio id="sound-wrong" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/209/209-preview.mp3"></audio>
+<audio id="sound-ball" preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/21/audio_f8f45869f1.mp3?filename=soft-woosh-7248.mp3"></audio>
+<audio id="sound-clock" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+<audio id="sound-cheer" preload="auto" src="https://assets.mixkit.co激active_storage/sfx/2853/2853-preview.mp3"></audio>
+<audio id="sound-boo" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/214/214-preview.mp3"></audio>
+
+<script>
+  const kuisData = [
+    { 
+      pertanyaan: 'Andi menyikat gigi sebelum tidur hanya kalau ingat. Ia juga suka ngemil permen sebelum tidur. Suatu hari giginya ngilu saat makan. Apa kemungkinan penyebabnya?', 
+      pilihan: ['Ia tidak minum cukup air', 'Ia kurang vitamin','Ia tidak menyikat gigi malam hari dan sisa makanan ','Ia terlalu banyak bermain'], 
+      benar: 2 
+    },
+    { 
+      pertanyaan: 'Kamu melihat temanmu hanya menyikat bagian depan giginya agar terlihat bersih. Apa yang bisa kamu katakan padanya?', 
+      pilihan: ['“Itu cukup, yang penting terlihat rapi', 'Sebaiknya semua bagian gigi disikat supaya tidak berlubang di bagian yang tidak kelihatan','Lebih baik kamu tidak usah menyikat gigi sekalian','Cukup pakai obat kumur saja.'], 
+      benar: 1 
+    },
+    { 
+      pertanyaan: 'Ayu merasa minder karena giginya menguning. Ia jarang menyikat gigi sebelum tidur dan sering minum teh manis. Apa saran paling tepat untuknya?', 
+      pilihan: ['Ganti warna gigi dengan pemutih','Hindari tersenyum agar tidak terlihat gigi kuning','Minum air putih lebih banyak untuk membersihkan mulut ← pengecoh','Sikat gigi secara teratur dan kurangi minuman manis'], 
+      benar: 3 
+    },
+    { 
+      pertanyaan: 'Kamu sedang mengembangkan aplikasi edukasi gigi untuk teman sebaya. Fitur apa yang paling berguna untuk meningkatkan motivasi mereka menjaga kebersihan gigi?', 
+      pilihan: ['Gambar dokter gigi yang menyeramkan', 'Cerita horor tentang sakit gigi','games dan kuis interaktif tentang cara merawat gigi','Halaman informasi panjang'], 
+      benar: 2 
+    },
+    { 
+      pertanyaan: 'Seorang siswa rajin menyikat gigi, tapi sering sakit gusi. Setelah dicek, ternyata ia menyikat terlalu keras. Apa pelajaran yang bisa diambil dari kasus ini?', 
+      pilihan: ['Semakin keras menyikat, semakin bersih', 'Tidak perlu menyikat gigi lagi','Menyikat gigi harus dilakukan dengan cara yang benar, bukan hanya sering ','Ganti sikat dengan yang lebih keras'], 
+      benar: 2 
+    },
+    {
+      pertanyaan: 'Jika seseorang merokok sejak remaja, apa yang bisa terjadi pada giginya dalam jangka panjang?', 
+      pilihan: ['Gigi jadi lebih kuat', 'Napas jadi segar','Gigi bisa menguning, gusi rusak, dan mulut berbau ','Risiko penyakit mulut tetap rendah selama rajin sikat gigi'], 
+      benar: 2 
+    },
+
+{
+      pertanyaan: 'Andra tahu bahwa merokok bisa menyebabkan bau mulut dan kerusakan gigi. Tapi dia tetap ingin coba karena teman-temannya merokok. Apa pilihan terbaik untuk Andra?', 
+      pilihan: ['Ikut merokok agar diterima', 'Tolak dengan sopan dan ajak teman melakukan hal sehat ','Merokok diam-diam saja','Minta orang tua tidak tahu'], 
+      benar: 1 
+    },
+
+{
+      pertanyaan: 'Kamu sudah tahu cara menyikat gigi yang benar dan waktunya tepat. Tapi kamu hanya melakukannya kalau disuruh. Apa yang bisa terjadi?', 
+      pilihan: ['Tidak masalah, yang penting dilakukan', 'Bisa lupa atau malas saat tidak ada yang menyuruh, sehingga gigi mudah','Menjadi lebih santai','Tidak akan pengaruh karena sikatnya sudah bagus'], 
+      benar: 1 
+    },
+
+{
+      pertanyaan: 'Apa yang bisa membuat kamu terbiasa menyikat gigi tanpa perlu disuruh terus-menerus?', 
+      pilihan: ['Diberi motivasi dari guru','Dikasih hukuman kalau lupa', 'Mengerti manfaatnya dan menjadikannya ','Dibelikan sikat gigi mahal'], 
+      benar: 2 
+    },
+
+
+  ];
+
+  let soalIndex = 0;
+  let sudahJawab = false;
+  let skorTotal = 0;
+  const poinPerSoal = 1;
+
+  const pertanyaanEl = document.getElementById('pertanyaan');
+  const pilihanEl = document.getElementById('pilihan-jawaban');
+  const hasilEl = document.getElementById('hasil');
+  const btnRestart = document.getElementById('btn-restart');
+  const btnIndex = document.getElementById('btn-index');
+  const ringBasketEl = document.getElementById('ring-basket');
+  const timerEl = document.getElementById('timer');
+  const soundCorrect = document.getElementById('sound-correct');
+  const soundWrong = document.getElementById('sound-wrong');
+  const soundBall = document.getElementById('sound-ball');
+  const soundClock = document.getElementById('sound-clock');
+  const soundCheer = document.getElementById('sound-cheer');
+  const soundBoo = document.getElementById('sound-boo');
+
+  const waktuPerSoal = 20; // detik per pertanyaan
+  let countdownTimer = null;
+  let waktuSisa = waktuPerSoal;
+
+  function createConfetti(container) {
+    for (let i = 0; i < 9; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      
+      const colors = ['#ff0', '#f0f', '#0ff', '#f00', '#0f0', '#00f'];
+      confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+      
+      confetti.style.left = Math.random() * 100 + 'vw';
+      confetti.style.top = '-10px';
+      confetti.style.width = Math.random() * 10 + 5 + 'px';
+      confetti.style.height = confetti.style.width;
+      
+      confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+      container.appendChild(confetti);
+      
+      setTimeout(() => {
+        confetti.remove();
+      }, 4000);
+    }
+  }
+
+  function mulaiTimer() {
+    clearInterval(countdownTimer);
+    waktuSisa = waktuPerSoal;
+    updateTimerDisplay();
+
+    soundClock.currentTime = 0;
+    soundClock.loop = true;
+    soundClock.play();
+    
+    countdownTimer = setInterval(() => {
+      waktuSisa--;
+      updateTimerDisplay();
+
+      if(waktuSisa <= 3 && waktuSisa > 0) {
+        soundClock.playbackRate = 1.5;
+        timerEl.style.animation = 'pulse 0.5s infinite alternate';
+      }
+
+      if(waktuSisa <= 0) {
+        soundClock.pause();
+        clearInterval(countdownTimer);
+        if(!sudahJawab) {
+          sudahJawab = true;
+          disableJawaban();
+          tampilkanEfekSalah();
+          setTimeout(() => {
+            lanjutSoalBerikutnya();
+          }, 2000);
+        }
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    timerEl.textContent = `Waktu: ${waktuSisa} detik`;
+  }
+
+  function disableJawaban() {
+    const items = document.querySelectorAll('.pilihan-item');
+    items.forEach(item => {
+      item.style.pointerEvents = 'none';
+      item.tabIndex = -1;
+    });
+  }
+
+  function enableJawaban() {
+    const items = document.querySelectorAll('.pilihan-item');
+    items.forEach(item => {
+      item.style.pointerEvents = 'auto';
+      item.tabIndex = 0;
+    });
+  }
+
+  function tampilkanSoal(index) {
+    sudahJawab = false;
+    btnRestart.style.display = 'none';
+    btnIndex.style.display = 'none';
+    hasilEl.textContent = '';
+    hasilEl.classList.remove('hore','huuu','skor');
+    pertanyaanEl.textContent = kuisData[index].pertanyaan;
+    pilihanEl.innerHTML = '';
+    ringBasketEl.classList.remove('impact');
+    enableJawaban();
+
+    kuisData[index].pilihan.forEach((jawaban, idx) => {
+      const item = document.createElement('div');
+      item.className = 'pilihan-item';
+      item.tabIndex = 0;
+      item.setAttribute('role', 'listitem');
+      item.setAttribute('aria-label', `Jawaban pilihan ${jawaban}`);
+      item.setAttribute('data-index', idx);
+
+      item.addEventListener('click', () => {
+        if(sudahJawab) return;
+        lemparBola(item.querySelector('.bola-label-wrapper'), idx);
+      });
+      
+      item.addEventListener('keydown', (e) => {
+        if(sudahJawab) return;
+        if(e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          lemparBola(item.querySelector('.bola-label-wrapper'), idx);
+        }
+      });
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'bola-label-wrapper';
+
+      const bola = document.createElement('div');
+      bola.className = 'bola';
+      bola.textContent = String.fromCharCode(65 + idx); // A, B, C, D
+      bola.setAttribute('aria-hidden', 'true');
+
+      const label = document.createElement('div');
+      label.className = 'label-jawaban';
+      label.textContent = jawaban;
+
+      wrapper.appendChild(bola);
+      wrapper.appendChild(label);
+      item.appendChild(wrapper);
+      pilihanEl.appendChild(item);
+    });
+
+    mulaiTimer();
+  }
+
+  function tampilkanEfekSalah() {
+    document.getElementById('huuu-effect').style.display = 'block';
+    document.getElementById('pesan-salah').style.display = 'block';
+    
+    document.getElementById('huuu-effect').style.animation = 'none';
+    document.getElementById('pesan-salah').style.animation = 'none';
+    void document.getElementById('huuu-effect').offsetWidth;
+    void document.getElementById('pesan-salah').offsetWidth;
+    document.getElementById('huuu-effect').style.animation = 'huuuFade 1.5s ease-out';
+    document.getElementById('pesan-salah').style.animation = 'huuuText 1.5s ease-out';
+    
+    soundBoo.currentTime = 0;
+    soundBoo.play();
+    soundWrong.currentTime = 0;
+    soundWrong.play();
+    
+    const semuaBola = document.querySelectorAll('.pilihan-item');
+    semuaBola.forEach(bola => {
+      bola.style.animation = 'wrongJump 0.7s ease-out';
+    });
+    
+    hasilEl.textContent = 'HUUUUUU!!!!';
+    hasilEl.classList.add('huuu');
+  }
+
+ function lemparBola(wrapper, idxJawaban) {
+    if (!wrapper || !wrapper.parentElement) return;
+    
+    sudahJawab = true;
+    soundClock.pause();
+    disableJawaban();
+    clearInterval(countdownTimer);
+    timerEl.textContent = '';
+
+    ringBasketEl.classList.add('impact');
+    soundBall.currentTime = 0;
+    soundBall.play();
+    
+    wrapper.parentElement.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      wrapper.parentElement.style.transform = 'scale(1)';
+    }, 100);
+
+    const rectRing = ringBasketEl.getBoundingClientRect();
+    const rectWrapper = wrapper.getBoundingClientRect();
+
+    const targetX = rectRing.left + rectRing.width/2 - rectWrapper.left - wrapper.offsetWidth/2;
+    const targetY = rectRing.top + rectRing.height/2 - rectWrapper.top - wrapper.offsetHeight/2;
+
+    wrapper.classList.remove('masuk-ring');
+    
+    wrapper.style.transition = 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
+    wrapper.style.transform = `translate(${targetX}px, ${targetY}px) scale(1.3) rotate(30deg)`;
+
+    wrapper.addEventListener('transitionend', function onReachedRing() {
+      wrapper.removeEventListener('transitionend', onReachedRing);
+      wrapper.style.transition = 'none';
+      wrapper.style.transform = 'none';
+      
+      const allItems = document.querySelectorAll('.pilihan-item');
+      allItems.forEach(item => {
+        const itemIdx = parseInt(item.getAttribute('data-index'));
+        if (itemIdx === kuisData[soalIndex].benar) {
+          item.classList.add('correct-answer');
+        } else if (itemIdx === idxJawaban && idxJawaban !== kuisData[soalIndex].benar) {
+          item.classList.add('wrong-answer');
+        }
+      });
+
+      wrapper.classList.add('masuk-ring');
+      
+      if(idxJawaban === kuisData[soalIndex].benar) {
+        soundCorrect.currentTime = 0;
+        soundCorrect.play();
+        
+        setTimeout(() => {
+          soundCheer.currentTime = 0;
+          soundCheer.play();
+        }, 800);
+        
+        createConfetti(ringBasketEl);
+        
+        hasilEl.textContent = 'HOREEEEE!!!';
+        hasilEl.classList.add('hore');
+        skorTotal += poinPerSoal;
+      } else {
+        tampilkanEfekSalah();
+      }
+
+      setTimeout(() => {
+        document.getElementById('huuu-effect').style.display = 'none';
+        document.getElementById('pesan-salah').style.display = 'none';
+        
+        const semuaBola = document.querySelectorAll('.pilihan-item');
+        semuaBola.forEach(bola => {
+          bola.style.animation = '';
+        });
+        
+        lanjutSoalBerikutnya();
+      }, 1500);
+    });
+  }
+
+  function resetSoal() {
+    const wrappers = document.querySelectorAll('.bola-label-wrapper');
+    wrappers.forEach(wrapper => {
+      wrapper.classList.remove('masuk-ring');
+      wrapper.style.transform = 'none';
+      wrapper.style.opacity = 1;
+      wrapper.style.pointerEvents = 'auto';
+    });
+    
+    const items = document.querySelectorAll('.pilihan-item');
+    items.forEach(item => {
+      item.classList.remove('correct-answer', 'wrong-answer');
+    });
+    
+    hasilEl.textContent = '';
+    hasilEl.classList.remove('hore','huuu','skor');
+    sudahJawab = false;
+    timerEl.textContent = '';
+  }
+
+  function lanjutSoalBerikutnya() {
+    resetSoal();
+    soalIndex++;
+    if(soalIndex >= kuisData.length) {
+      tampilkanSkorAkhir();
+    } else {
+      tampilkanSoal(soalIndex);
+    }
+  }
+
+  function tampilkanSkorAkhir() {
+    const skorMaksimal = kuisData.length * poinPerSoal;
+    const persentase = (skorTotal / skorMaksimal) * 100;
+
+    pertanyaanEl.textContent = '';
+    pilihanEl.innerHTML = '';
+    timerEl.textContent = '';
+
+    const lulus = persentase >= 60;
+
+    const scoreHTML = `
+      <div class="score-container">
+        <div class="score-title">Skor Akhir Anda</div>
+        <div class="score-value">${skorTotal}/${skorMaksimal}</div>
+        <div class="score-message ${lulus ? 'pass' : 'fail'}">
+          ${lulus ? 'Selamat Anda berhasil menyelesaikan dengan baik!' : 'Maaf mohon diulangi!'}
+        </div>
+      </div>
+    `;
+
+    hasilEl.innerHTML = scoreHTML;
+    hasilEl.classList.add('skor');
+    hasilEl.style.opacity = '1';
+    hasilEl.style.transform = 'scale(1)';
+
+    if (lulus) {
+      soundCheer.currentTime = 0;
+      soundCheer.play();
+      btnIndex.style.display = 'block';
+      btnRestart.style.display = 'none';
+    } else {
+      soundBoo.currentTime = 0;
+      soundBoo.play();
+      btnRestart.style.display = 'block';
+      btnIndex.style.display = 'none';
+    }
+  }
+
+  btnRestart.addEventListener('click', () => {
+    soalIndex = 0;
+    skorTotal = 0;
+    btnRestart.style.display = 'none';
+    btnIndex.style.display = 'none';
+    tampilkanSoal(soalIndex);
+  });
+
+  btnIndex.addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      handleResize();
+    }, 200);
+  });
+
+  function handleResize() {
+    const wrappers = document.querySelectorAll('.bola-label-wrapper');
+    wrappers.forEach(wrapper => {
+      wrapper.style.transform = 'none';
+    });
+    
+    const width = window.innerWidth;
+    if (width <= 360) {
+      document.documentElement.style.setProperty('--base-font-size', '12px');
+    } else if (width <= 768) {
+      document.documentElement.style.setProperty('--base-font-size', '14px');
+    } else {
+      document.documentElement.style.setProperty('--base-font-size', '16px');
+    }
+  }
+
+  function checkOrientation() {
+    if (window.innerHeight < window.innerWidth && window.innerHeight < 500) {
+      document.getElementById('orientation-warning').style.display = 'block';
+    } else {
+      document.getElementById('orientation-warning').style.display = 'none';
+    }
+  }
+
+  window.addEventListener('load', checkOrientation);
+  window.addEventListener('orientationchange', checkOrientation);
+
+  tampilkanSoal(soalIndex);
+</script>
+<div id="warning-modal" style="
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: white;
+  padding: 30px;
+  text-align: center;
+  font-size: 20px;
+  flex-direction: column;
+">
+  <div>
+    Main Handphone harus dapat izin orang tua yaaa!!!<br>
+    Harus menggunakan game hanya 15-30 menit saja untuk menghindari kerusakan atau kelelahan mata.
+  </div>
+  <button onclick="document.getElementById('warning-modal').style.display='none'" style="
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #2563eb;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  ">Saya Mengerti</button>
+</div>
+
+</body>
+</html>

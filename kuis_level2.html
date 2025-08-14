@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Game Kuis Kesehatan Gigi</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+
+  :root {
+    --color-accent: #60a5fa; /* warna biru terang */
+    --animation-duration: 0.5s;
+    --border-radius: 0.75rem;
+  }
+
+  /* Reset and base */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: url('https://i.pinimg.com/1200x/c8/4e/2c/c84e2cc6181bdb712fbb62633aa24f3e.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: rgba(240 240 240 / 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 3rem 1.5rem 4rem;
+    user-select: none;
+    position: relative;
+    z-index: 0;
+    text-shadow:
+       0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  /* Overlay gelap transparan untuk meningkatkan keterbacaan teks */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    z-index: -1;
+  }
+
+  h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+    color: #F0F0F0;
+    line-height: 1.1;
+    text-align: center;
+    text-shadow:
+      0 2px 6px rgba(0,0,0,0.9);
+  }
+
+  #question-counter {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    margin-bottom: 2.8rem;
+    text-align: center;
+    text-shadow:
+      0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  #question-text {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #F0F0F0;
+    max-width: 720px;
+    text-align: center;
+    margin-bottom: 3rem;
+    line-height: 1.3;
+    text-shadow:
+      0 2px 6px rgba(0,0,0,0.9);
+  }
+
+  #answers {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 2rem;
+    max-width: 720px;
+    width: 100%;
+  }
+
+  .answer-box {
+    position: relative;
+    background: linear-gradient(145deg, #b2800e, #7a5200);
+    border-radius: var(--border-radius);
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.3),
+      inset 0 4px 8px rgba(255 243 205, 0.85),
+      inset 0 -6px 6px rgba(143 88 11, 0.9);
+    cursor: pointer;
+    padding: 1.5rem 1.75rem;
+    user-select: none;
+    color: #fff8dc;
+    font-size: 1rem;
+    font-weight: 600;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease,
+      background 0.3s ease;
+    will-change: transform, box-shadow, background;
+    border: 3px solid #5a3e00;
+  }
+
+  .answer-box::before,
+  .answer-box::after {
+    position: absolute;
+    content: "";
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle at center, #6a4e0a, #4b3600);
+    border-radius: 50%;
+    box-shadow:
+      0 1px 1px rgba(255 255 255 / 0.3),
+      inset 0 1px 2px rgba(0 0 0 / 0.85);
+  }
+  .answer-box::before {
+    top: 8px;
+    left: 8px;
+  }
+  .answer-box::after {
+    top: 8px;
+    right: 8px;
+  }
+
+  .answer-box:hover,
+  .answer-box:focus-visible {
+    transform: scale(1.05);
+    outline-offset: 4px;
+    outline: 3px solid var(--color-accent);
+    box-shadow:
+      0 6px 16px rgba(0,0,0,0.4),
+      inset 0 6px 10px rgba(255 243 205, 0.9),
+      inset 0 -8px 8px rgba(143 88 11 / 0.8);
+    background: linear-gradient(145deg, #e0bf7b, #b07a23);
+    color: #fff8dc;
+    text-shadow:
+      0 1px 2px rgba(0,0,0,0.8);
+  }
+
+  .answer-box[disabled] {
+    cursor: default;
+    opacity: 0.75;
+  }
+
+  .answer-box > span {
+    position: relative;
+    user-select: none;
+  }
+
+  .bullet {
+    position: fixed;
+    width: 16px;
+    height: 16px;
+    background: var(--color-accent);
+    border-radius: 50%;
+    filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.7));
+    z-index: 10000;
+    pointer-events: none;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes bullet-fly-down {
+    from {
+      opacity: 1;
+      transform: translateY(0) translateX(0);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(var(--target-distance-y)) translateX(var(--target-distance-x));
+    }
+  }
+
+  @keyframes box-break {
+    0% {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+      box-shadow:
+        inset 0 4px 8px rgba(255 243 205, 0.85),
+        inset 0 -6px 6px rgba(143 88 11 / 0.7),
+        0 6px 12px rgba(0,0,0,0.15);
+      background: linear-gradient(145deg, #d9b273, #a87025);
+      border-color: #7f5e00;
+      color: #422e00;
+      text-shadow: none;
+    }
+    40% {
+      opacity: 0.8;
+      transform: scale(0.9) rotate(5deg);
+      background: linear-gradient(145deg, #e7d490, #b8973e);
+      border-color: #9e7300;
+      color: #59450a;
+    }
+    80% {
+      opacity: 0.4;
+      transform: scale(0.4) rotate(45deg);
+      box-shadow: none;
+      background: linear-gradient(145deg, #cabd72, #7d6331);
+      border-color: #836b00;
+      color: #6a5f1e;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0) rotate(70deg);
+      box-shadow: none;
+      background: linear-gradient(145deg, #b39c52, #604d20);
+      border-color: #684800;
+      color: #6f6825;
+    }
+  }
+
+  @keyframes box-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+  }
+
+  .answer-box.broken {
+    pointer-events: none;
+    animation: box-break var(--animation-duration) forwards;
+    cursor: default;
+  }
+
+  .answer-box.shake {
+    animation: box-shake 0.3s;
+  }
+
+  #game-over {
+    margin-top: 3rem;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    text-align: center;
+    max-width: 720px;
+    text-shadow:
+      0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  #restart-btn, #next-level-btn {
+    margin-top: 1.8rem;
+    background: var(--color-accent);
+    color: white;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.9rem 2.4rem;
+    font-size: 1.1rem;
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #restart-btn:hover, #next-level-btn:hover,
+  #restart-btn:focus-visible, #next-level-btn:focus-visible {
+    background: #1e40af;
+    outline: none;
+  }
+
+  @media (max-width: 360px) {
+    #answers {
+      grid-template-columns: 1fr;
+      gap: 1.2rem;
+    }
+    .answer-box {
+      min-height: 90px;
+      font-size: 0.95rem;
+      padding: 1rem 1.3rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>Kuis Kesehatan Gigi Level2</h1>
+  <div id="question-counter" aria-live="polite" aria-atomic="true">Pertanyaan 1 / 5</div>
+  <div id="question-text">Memuat pertanyaan...</div>
+  <div id="answers" role="list"></div>
+
+  <div id="game-over" role="alert" aria-live="assertive" hidden>
+    <p id="game-message">Kamu selesai menjawab semua pertanyaan! 🎉</p>
+    <p>Nilai akhir kamu: <span id="final-score">0</span></p>
+    <button id="next-level-btn" aria-label="Lanjut ke level berikutnya" hidden>Lanjut ke Level Berikutnya</button>
+    <button id="restart-btn" aria-label="Mulai ulang kuis" hidden>Ulangi Permainan</button>
+  </div>
+
+  <!-- Suara -->
+  <audio id="background-sound" src="https://cdn.pixabay.com/audio/2025/06/03/audio_f2f67948ab.mp3" preload="auto" loop></audio>
+  <audio id="shoot-sound" src="https://cdn.pixabay.com/audio/2022/03/24/audio_b32c283b87.mp3" preload="auto"></audio>
+  <audio id="hit-sound" src="" preload="auto"></audio>
+
+<script>
+  (() => {
+    const questions = [
+      {
+        question: "Seorang siswa menyikat gigi hanya di pagi hari karena terburu-buru tidur di malam hari. Apa risiko terbesar dari kebiasaan ini?",
+        answers: [
+          "Gigi menjadi sensitif terhadap makanan dingin",
+          "Bakteri menumpuk di malam hari dan dapat menyebabkan gigi berlubang",
+          "Tidak ada risiko selama pagi sudah disikat",
+          "Bau mulut hanya terjadi jika lupa sarapan"
+        ],
+        correctIndex: 1
+      },
+      {
+        question: "Jika kamu rutin menyikat gigi tapi tetap mengalami bau mulut, apa yang sebaiknya kamu lakukan?",
+        answers: [
+          "Menyikat gigi lebih dari lima kali sehari",
+          "Berhenti menyikat gigi karena tidak efektif",
+          "Memeriksakan kondisi ke dokter gigi untuk mengetahui penyebab lain",
+          "Berkumur dengan parfum atau sabun mulut"
+        ],
+        correctIndex: 2
+      },
+      {
+        question: "Mengapa menyikat gigi malam hari lebih penting daripada pagi hari?",
+        answers: [
+          "Karena tidur membuat air liur kering dan bakteri mudah berkembang",
+          "Karena malam hari gigi tidak dipakai mengunyah",
+          "Karena pagi hari kita buru-buru",
+          "Karena pasta gigi lebih efektif malam hari"
+        ],
+        correctIndex: 0
+      },
+      {
+        question: "Seorang siswa takut ke dokter gigi karena mendengar cerita buruk dari temannya. Sikap terbaik yang mencerminkan motivasi sehat adalah…",
+        answers: [
+          "Tidak pergi dan menghindari masalah",
+          "Mencari informasi langsung dari dokter atau guru untuk mengurangi rasa takut",
+          "Menunggu sampai sakit parah",
+          "Mengikuti cerita teman dan menyebarkannya"
+        ],
+        correctIndex: 1
+      },
+      {
+        question: "Kamu sedang sakit gigi, tapi tidak pernah periksa ke dokter gigi sebelumnya. Apa kebiasaan yang perlu kamu ubah?",
+        answers: [
+          "Tidak minum air dingin",
+          "Rajin makan makanan pedas",
+          "Periksa ke dokter gigi secara rutin meskipun tidak sakit",
+          "Menghindari senyum"
+        ],
+        correctIndex: 2
+      }
+    ];
+
+    const POINTS_PER_CORRECT = 1;
+    const SCORE_THRESHOLD_NEXT_LEVEL = 5;
+
+    const questionCounter = document.getElementById('question-counter');
+    const questionText = document.getElementById('question-text');
+    const answersContainer = document.getElementById('answers');
+    const gameOverContainer = document.getElementById('game-over');
+    const finalScoreSpan = document.getElementById('final-score');
+    const restartBtn = document.getElementById('restart-btn');
+    const nextLevelBtn = document.getElementById('next-level-btn');
+    const shootSound = document.getElementById('shoot-sound');
+    const hitSound = document.getElementById('hit-sound');
+    const backgroundSound = document.getElementById('background-sound');
+    const gameMessage = document.getElementById('game-message');
+
+    let currentQuestionIndex = 0;
+    let isAnswering = false;
+    let score = 0;
+
+    // Putar backsound saat halaman di-load (perhatikan kebijakan autoplay browser)
+    window.addEventListener('load', () => {
+      backgroundSound.volume = 0.2;
+      backgroundSound.play().catch(() => {
+        console.log('Backsound autoplay diblok browser');
+      });
+    });
+
+    // Kontrol cooldown agar suara hit tidak bertumpuk
+    let canPlayHitSound = true;
+    const HIT_SOUND_COOLDOWN = 300; // ms
+
+    function playHitSound() {
+      if (!canPlayHitSound) return;
+      canPlayHitSound = false;
+      hitSound.currentTime = 0;
+      hitSound.volume = 1.0;
+      hitSound.play().catch(() => {});
+      setTimeout(() => {
+        canPlayHitSound = true;
+      }, HIT_SOUND_COOLDOWN);
+    }
+
+    function clearAnswers() {
+      answersContainer.innerHTML = '';
+    }
+
+    function createBullet(targetElem) {
+      const bullet = document.createElement('div');
+      bullet.classList.add('bullet');
+
+      document.body.appendChild(bullet);
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const targetRect = targetElem.getBoundingClientRect();
+
+      const bulletStartX = viewportWidth / 2 - 8; 
+      const bulletStartY = viewportHeight + 20;
+
+      bullet.style.left = `${bulletStartX}px`;
+      bullet.style.top = `${bulletStartY}px`;
+
+      const targetCenterX = targetRect.left + targetRect.width / 2;
+      const targetCenterY = targetRect.top + targetRect.height / 2;
+
+      const translateX = targetCenterX - bulletStartX;
+      const translateY = targetCenterY - bulletStartY;
+
+      bullet.style.setProperty('--target-distance-x', `${translateX}px`);
+      bullet.style.setProperty('--target-distance-y', `${translateY}px`);
+
+      bullet.style.animation = `bullet-fly-down var(--animation-duration) forwards`;
+
+      bullet.addEventListener('animationstart', () => {
+        shootSound.currentTime = 0;
+        shootSound.volume = 0.8;
+        shootSound.play().catch(() => {});
+      });
+
+      bullet.addEventListener('animationend', () => {
+        bullet.remove();
+        playHitSound();
+      });
+
+      return bullet;
+    }
+
+    function breakBox(boxElem) {
+      boxElem.classList.add('broken');
+      setTimeout(() => {
+        boxElem.style.visibility = 'hidden';
+      }, 350);
+    }
+
+    function shakeBox(boxElem) {
+      boxElem.classList.add('shake');
+      setTimeout(() => {
+        boxElem.classList.remove('shake');
+      }, 300);
+    }
+
+    function disableAllAnswers() {
+      const buttons = answersContainer.querySelectorAll('.answer-box');
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.cursor = 'default';
+      });
+    }
+
+    function renderQuestion(index) {
+      const question = questions[index];
+      questionCounter.textContent = `Pertanyaan ${index + 1} / ${questions.length}`;
+      questionText.textContent = question.question;
+      clearAnswers();
+
+      question.answers.forEach((answerText, i) => {
+        const box = document.createElement('button');
+        box.classList.add('answer-box');
+        box.type = 'button';
+        box.setAttribute('role', 'listitem');
+        box.setAttribute('aria-label', `Pilihan jawaban ${i + 1}: ${answerText.replace('', ' (jawaban benar)')}`);
+        box.innerHTML = `<span>${answerText}</span>`;
+
+        box.addEventListener('click', () => {
+          if (isAnswering) return;
+          isAnswering = true;
+          disableAllAnswers();
+
+          const bullet = createBullet(box);
+
+          setTimeout(() => {
+            if (i === question.correctIndex) {
+              breakBox(box);
+              score += POINTS_PER_CORRECT;
+            } else {
+              shakeBox(box);
+            }
+          }, 500);
+
+          setTimeout(() => {
+            isAnswering = false;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+              renderQuestion(currentQuestionIndex);
+            } else {
+              answersContainer.style.display = 'none';
+              questionText.style.display = 'none';
+              questionCounter.style.display = 'none';
+              finalScoreSpan.textContent = score;
+              gameOverContainer.hidden = false;
+
+              if (score < SCORE_THRESHOLD_NEXT_LEVEL) {
+                gameMessage.textContent = "Kamu perlu belajar lebih banyak tentang kesehatan gigi!";
+                restartBtn.hidden = false;
+                nextLevelBtn.hidden = true;
+              } else {
+                gameMessage.textContent = "Selamat! Kamu sangat memahami pentingnya kesehatan gigi! 🎉";
+                restartBtn.hidden = true;
+                nextLevelBtn.hidden = false;
+              }
+
+              (score >= SCORE_THRESHOLD_NEXT_LEVEL ? nextLevelBtn : restartBtn).focus();
+            }
+          }, 1000);
+        });
+
+        answersContainer.appendChild(box);
+      });
+    }
+
+    restartBtn.addEventListener('click', () => {
+      currentQuestionIndex = 0;
+      score = 0;
+      gameOverContainer.hidden = true;
+      answersContainer.style.display = '';
+      questionText.style.display = '';
+      questionCounter.style.display = '';
+      gameMessage.textContent = "Kamu selesai menjawab semua pertanyaan! 🎉";
+      restartBtn.hidden = true;
+      nextLevelBtn.hidden = true;
+      renderQuestion(currentQuestionIndex);
+    });
+
+    nextLevelBtn.addEventListener('click', () => {
+      window.location.href = 'kuis_level3.html';
+    });
+
+    // Mulai permainan
+    renderQuestion(currentQuestionIndex);
+  })();
+</script>
+<div id="warning-modal" style="
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: white;
+  padding: 30px;
+  text-align: center;
+  font-size: 20px;
+  flex-direction: column;
+">
+  <div>
+    Main Handphone harus dapat izin orang tua yaaa!!!<br>
+    Harus menggunakan game hanya 15-30 menit saja untuk menghindari kerusakan atau kelelahan mata.
+  </div>
+  <button onclick="document.getElementById('warning-modal').style.display='none'" style="
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #2563eb;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  ">Saya Mengerti</button>
+</div>
+
+</body>
+</html>
+

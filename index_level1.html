@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mini Game Quitee</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap');
+    body {
+      box-sizing: border-box;
+      width: 100vw;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(120deg, #e0f7fa 0%, #a5d8ff 100%), url('https://down-yuantu.pngtree.com/back_our/bg/20190827/bg/d23b288df69e2.png?e=1750607593&st=ZDBjNGFiNGJiMDE3Y2IwZmVjMDc5MDNlYTAzMjcyMjI&n=%E2%80%94Pngtree%E2%80%94pastel+colorful+background+clouds_1162170.png');
+      background-size: cover, cover;
+      background-blend-mode: overlay;
+      background-size: 400% 400%;
+      animation: bg-anim 20s ease infinite;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    @keyframes bg-anim {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+    h1 {
+      color: #2563eb;
+      font-size: 40px;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.2), 0 0 10px rgba(37,99,235,0.5);
+      animation: glow 2s ease-in-out infinite alternate;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    .card, .selected-card {
+      width: 160px;
+      height: 160px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.3s, opacity 0.3s;
+      position: relative;
+    }
+    .card:hover { transform: translateY(-10px) scale(1.05); }
+    .blurred { opacity: 0.4; }
+    #card-container, #selected-cards-container {
+      width: 100%;
+      padding: 0 10px;
+      box-sizing: border-box;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    #selected-cards-container {
+      margin-top: 40px;
+    }
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background-color: #fff;
+      animation: float 4s ease-in-out infinite alternate;
+    }
+    @keyframes float {
+      from { transform: translateY(0px); }
+      to   { transform: translateY(-10px); }
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      background: #2563eb;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 6px 12px rgba(37,99,235,0.3);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      margin-top: 10px;
+    }
+    button:hover { background: #1e40af; transform: translateY(-2px); }
+    #result-container {
+      margin-top: 30px;
+      text-align: center;
+      font-weight: bold;
+      color: #2563eb;
+    }
+      @keyframes glow {
+      from {
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.2), 0 0 10px rgba(37,99,235,0.5);
+      }
+      to {
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.3), 0 0 18px rgba(37,99,235,0.8);
+      }
+    }
+  </style>
+<audio id="background-music" src="https://cdn.pixabay.com/audio/2025/06/13/audio_09c7513b8a.mp3" autoplay loop></audio>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const music = document.getElementById("background-music");
+  music.volume = 0.2;
+  music.play().catch(() => {
+    document.body.addEventListener("click", () => music.play(), { once: true });
+  });
+});
+</script>
+</head>
+<body>
+<h1>Mini Game Quitee</h1>
+<div id="question" style="margin-bottom: 30px; font-size: 24px; font-weight: 700; text-align: center; max-width: 800px;">Pertanyaan dimuat...</div>
+<div id="card-container"></div>
+<div id="selected-cards-container"></div>
+<button id="confirm-selection" disabled>Konfirmasi Pilihan</button>
+<div id="result-container"></div>
+
+<script>
+const questions = [
+  { question: "Berapa kali menyikat gigi dalam sehari?", cards: [
+    { image: "images/level1_soal1_a(benar).png", correct: true },
+    { image: "images/level1_soal1_b.png", correct: false },
+    { image: "images/level1_soal1_c.png", correct: false },
+    { image: "images/level1_soal1_d.png", correct: false }
+  ]},
+  { question: "Gigi berfungsi untuk?", cards: [
+    { image: "images/level1_soal2_a.png", correct: true },
+    { image: "images/level1_soal2_b(benar).png", correct: false },
+    { image: "images/level1_soal2_c.png", correct: false },
+    { image: "images/level1_soal2_d.png", correct: false }
+  ]},
+  { question: "Gigi mudah rusak karena?", cards: [
+    { image: "images/level1_soal3_a.png", correct: true },
+    { image: "images/level1_soal3_b.png", correct: false },
+    { image: "images/level1_soal3_c(benar).png", correct: false },
+    { image: "images/level1_soal3_d.png", correct: false }
+  ]},
+  { question: "Kapan sikat gigi harus diganti?", cards: [
+    { image: "images/level1_soal4_a(benar).png", correct: true },
+    { image: "images/level1_soal4_b.png", correct: false },
+    { image: "images/level1_soal4_c.png", correct: false },
+    { image: "images/level1_soal4_d.png", correct: false }
+  ]},
+  { question: "Cara menyikat gigi bagian atas?", cards: [
+    { image: "images/level1_soal5_a.png", correct: true },
+    { image: "images/level1_soal5_b.png", correct: false },
+    { image: "images/level1_soal5_c.png", correct: false },
+    { image: "images/level1_soal5_d(benar).png", correct: false }
+  ]},
+  { question: "Apa yang dilakukan jika bulu sikat rontok?", cards: [
+    { image: "images/level1_soal6_a(benar).png", correct: true },
+    { image: "images/level1_soal6_b.png", correct: false },
+    { image: "images/level1_soal6_c.png", correct: false },
+    { image: "images/level1_soal6_d.png", correct: false }
+  ]}
+];
+
+let currentQuestionIndex = 0;
+let score = 0;
+const cardContainer = document.getElementById('card-container');
+const selectedCardsContainer = document.getElementById('selected-cards-container');
+const confirmBtn = document.getElementById('confirm-selection');
+const questionElem = document.getElementById('question');
+const resultContainer = document.getElementById('result-container');
+let selectedCards = [];
+
+function renderQuestion(){
+  if (!questions[currentQuestionIndex]) return;
+  selectedCards = [];
+  confirmBtn.disabled = true;
+  selectedCardsContainer.innerHTML = '';
+  cardContainer.innerHTML = '';
+  const q = questions[currentQuestionIndex];
+  questionElem.textContent = q.question;
+
+  const allCardElements = [];
+
+  q.cards.forEach(cardData => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const img = document.createElement('img');
+    img.src = cardData.image;
+    card.dataset.correct = cardData.correct ? "true" : "false";
+    card.onclick = () => {
+      if(selectedCards.length < 2 && !selectedCards.includes(card)){
+        selectedCards.push(card);
+        card.style.border = '3px solid #2563eb';
+        if(selectedCards.length === 2) {
+          confirmBtn.disabled = false;
+          allCardElements.forEach(c => {
+            if (!selectedCards.includes(c)) {
+              c.classList.add('blurred');
+            }
+          });
+        }
+      }
+    };
+    card.appendChild(img);
+        cardContainer.appendChild(card);
+    allCardElements.push(card);
+  });
+}
+
+confirmBtn.onclick = () => {
+  selectedCards.forEach(card => {
+    card.classList.remove('blurred');
+    card.style.border = 'none';
+    cardContainer.removeChild(card);
+    selectedCardsContainer.appendChild(card);
+    card.onclick = () => {
+      if (card.dataset.correct === "true") {
+        score += 1;
+      }
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        renderQuestion();
+      } else {
+        showFinalResult();
+      }
+    };
+  });
+  confirmBtn.disabled = true;
+};
+
+function showFinalResult() {
+  questionElem.textContent = "Semua Soal Telah Dikerjakan";
+  selectedCardsContainer.innerHTML = '';
+  confirmBtn.style.display = 'none';
+  let message = score >= 6
+    ? `🎉 Selamat! Kamu mendapatkan skor ${score}.<br><button onclick=\"window.location.href='level2.html'\">Lanjut ke Level 2</button>`
+    : `😔 Skor kamu ${score}. Mohon belajar lebih giat lagi.<br><button onclick=\"window.location.reload()\">Ulangi Mini Game</button>`;
+  resultContainer.innerHTML = `<div style='font-size: 28px;'>${message}</div>`;
+}
+
+renderQuestion();
+</script>
+
+<div id="warning-modal" style="
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: white;
+  padding: 30px;
+  text-align: center;
+  font-size: 20px;
+  flex-direction: column;
+">
+  <div>Main Handphone harus dapat izin orang tua yaaa!!!<br>
+  Harus menggunakan game hanya 15-30 menit saja untuk menghindari kerusakan atau kelelahan mata.</div>
+  <button onclick="document.getElementById('warning-modal').style.display='none'" style="
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #2563eb;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  ">Saya Mengerti</button>
+</div>
+
+</body>
+</html>

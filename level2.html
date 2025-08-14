@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Puzzle Slot - 5 Soal</title>
+  <style>
+* { box-sizing: border-box; }
+body {
+  font-family: 'Comic Sans MS', 'Nunito', 'Baloo 2', Arial, sans-serif;
+  background: linear-gradient(135deg, #ffe3ec 0%, #ffeaa7 40%, #a1c4fd 100%);
+  min-height: 100vh;
+  margin: 0;
+  padding: 10px;
+  transition: background 0.7s;
+}
+h1 {
+  font-size: clamp(20px, 5vw, 34px);
+  text-align: center;
+  margin-bottom: 10px;
+  color: #ed6ea0;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 7px #fff6, 0 0 2px #ffef;
+}
+#score {
+  text-align: center;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  color: #3470e4;
+  font-weight: bold;
+  background: #fff6;
+  border-radius: 12px;
+  display: inline-block;
+  padding: 5px 18px;
+  box-shadow: 0 3px 10px #aaa3;
+}
+.wrapper {
+  max-width: 380px;
+  margin: 0 auto;
+  border-radius: 32px;
+  box-shadow: 0 8px 24px #9ec9fd85, 0 0px 2px #fff8;
+  background: #fff7;
+  padding-bottom: 18px;
+  border: 3px solid #9ec9fd60;
+}
+#soal-indikator {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #fd79a8;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 4px #ffed;
+}
+#puzzle-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 32px;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+.piece {
+  width: 100%;
+  max-width: 90px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px #7fd3ff6e, 0 0 2px #e3b5ff82;
+  border: 3px solid #ffe7ee;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.1s, opacity 0.2s, filter 0.2s, border 0.2s;
+  background: #fff;
+  margin: 0 auto;
+  position: relative;
+  touch-action: manipulation;
+  user-select: none;
+}
+.piece.used {
+  opacity: 0.34;
+  filter: grayscale(100%);
+  border: 3px solid #00b894;
+}
+.piece.selected {
+  outline: 4px solid #00b894;
+  box-shadow: 0 0 8px #00b89477, 0 3px 12px #a1c4fd77;
+}
+hr.separator {
+  border: none;
+  height: 3px;
+  background: linear-gradient(90deg, #81ecec, #ed6ea0, #fbc2eb);
+  margin: 20px 0 15px 0;
+  border-radius: 2px;
+}
+#bottom-section {
+  display: grid;
+  grid-template-columns: 68px 68px;
+  gap: 4px;
+  align-items: start;
+  justify-content: center;
+}
+#drop-left,
+#fixed-right {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.drop-slot,
+.extra-image,
+.dropped {
+  max-width: 64px;
+  min-width: 60px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.drop-slot {
+  aspect-ratio: 1 / 1;
+  border: 3px dashed #fdcb6e;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #dff9fb 80%, #fad0c4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+  box-shadow: 0 3px 10px #b3b3b325;
+  touch-action: manipulation;
+  user-select: none;
+  cursor: pointer;
+}
+.slot-label {
+  position: absolute;
+  top: 7px;
+  left: 8px;
+  font-size: 0.73rem;
+  color: #a29bfe;
+  pointer-events: none;
+  font-family: 'Nunito', 'Baloo 2', Arial, sans-serif;
+  font-weight: 500;
+  text-shadow: 1px 1px 2px #fff8;
+}
+.drop-slot.highlight {
+  background: linear-gradient(135deg, #ffeaa7 60%, #b2fffd 100%);
+  border-color: #00b894;
+  box-shadow: 0 2px 18px #00b89444;
+  animation: bounceHighlight 0.3s;
+}
+@keyframes bounceHighlight {
+  0% { transform: scale(1.01); }
+  40% { transform: scale(1.07); }
+  100% { transform: scale(1); }
+}
+.drop-slot.filled {
+  border-style: solid;
+  border-color: #00b894;
+  background: linear-gradient(135deg, #cafffb 80%, #d2ffea 100%);
+  box-shadow: 0 0 8px #a3eaf0b9;
+}
+.extra-image, .dropped {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 3px 11px #fd79a82c, 0 0px 2px #e3b5ff1e;
+  border: 2px solid #fd79a8;
+  background: #fff;
+  touch-action: manipulation;
+  user-select: none;
+}
+#next-btn {
+  display: none;
+  margin: 17px auto 0 auto;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  background: linear-gradient(90deg, #81ecec, #fd79a8 80%);
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 2px 10px #b3b3b322;
+  transition: background 0.3s, transform 0.14s;
+}
+#next-btn:hover {
+  background: linear-gradient(90deg, #fd79a8, #81ecec 100%);
+  color: #fff;
+  transform: scale(1.06);
+  letter-spacing: 1px;
+}
+@media (max-width: 600px) {
+  h1 { font-size: 6vw; }
+  .piece { max-width: 60px; }
+  #puzzle-row { gap: 16px 10px; }
+  #bottom-section {
+    grid-template-columns: 46px 46px;
+    gap: 3px;
+  }
+  .drop-slot, .extra-image, .dropped {
+    max-width: 44px;
+    min-width: 40px;
+  }
+  #next-btn {
+    width: 100%;
+    font-size: 0.97rem;
+  }
+  .wrapper { padding-bottom: 10px; }
+}
+  </style>
+</head>
+<body>
+
+<h1>Level 2</h1>
+<p id="score">Skor: 100</p>
+<div class="wrapper">
+  <div id="soal-indikator" style="text-align:center; font-weight:bold; margin-bottom:10px;">Soal 1</div>
+  <div id="puzzle-container"></div>
+  <button id="next-btn">Lanjut ke Soal Berikutnya</button>
+</div>
+
+<script>
+const levels = [
+  {
+    id: 1,
+    pieces: [
+      "image_level2/no_1_salah_a.png",
+      "image_level2/no_1_benar_a.png",
+      "image_level2/no_1_benar_e.png",
+      "image_level2/no_1_benar_f.png"
+    ],
+    validImageOrder: [
+      "no_1_salah_a.png",
+      "no_1_benar_a.png",
+      "no_1_benar_e.png",
+      "no_1_benar_f.png"
+    ],
+    correctIndexToCheck: 0,
+    references: [
+      "image_level2/no_1_salah_b.png",
+      "image_level2/no_1_benar_c.png",
+      "image_level2/no_1_benar_d.png",
+      "image_level2/no_1_benar_d.png"
+    ]
+  },
+  {
+    id: 2,
+    pieces: [
+      "image_level2/soal2/no_1_benar_a.png",
+      "image_level2/soal2/no_1_benar_b.png",
+      "image_level2/soal2/no_1_benar_c.png",
+      "image_level2/soal2/no_1_salah_a.png"
+    ],
+    validImageOrder: [
+      "no_1_benar_a.png",
+      "no_1_benar_b.png",
+      "no_1_salah_a.png",
+      "no_1_benar_c.png"
+    ],
+    correctIndexToCheck: 2,
+    references: [
+      "image_level2/soal2/no_1_benar_d.png",
+      "image_level2/soal2/no_1_benar_e.png",
+      "image_level2/soal2/no_1_salah_b.png",
+      "image_level2/soal2/no_1_benar_f.png"
+    ]
+  },
+  {
+    id: 3,
+    pieces: [
+      "image_level2/soal3/no_1_benar_a.png",
+      "image_level2/soal3/no_1_salah_a.png",
+      "image_level2/soal3/no_1_benar_b.png",
+      "image_level2/soal3/no_1_benar_c.png"
+    ],
+    validImageOrder: [
+      "no_1_benar_a.png",
+      "no_1_salah_a.png",
+      "no_1_benar_b.png",
+      "no_1_benar_c.png"
+    ],
+    correctIndexToCheck: 5,
+    references: [
+      "image_level2/soal3/no_1_benar_d.png",
+      "image_level2/soal3/no_1_benar_e.png",
+      "image_level2/soal3/no_1_benar_f.png",
+      "image_level2/soal3/no_1_salah_b.png"
+    ]
+  },
+  {
+    id: 4,
+    pieces: [
+      "image_level2/soal4/no_1_benar_a.png",
+      "image_level2/soal4/no_1_benar_b.png",
+      "image_level2/soal4/no_1_salah_a.png",
+      "image_level2/soal4/no_1_benar_c.png"
+    ],
+    validImageOrder: [
+      "no_1_benar_a.png",
+      "no_1_benar_b.png",
+      "no_1_salah_a.png",
+      "no_1_benar_c.png"
+    ],
+    correctIndexToCheck: 0,
+    references: [
+      "image_level2/soal4/no_1_benar_d.png",
+      "image_level2/soal4/no_1_salah_b.png",
+      "image_level2/soal4/no_1_benar_e.png",
+      "image_level2/soal4/no_1_benar_f.png"
+    ]
+  },
+  {
+    id: 5,
+    pieces: [
+      "image_level2/soal5/no_1_benar_a.png",
+      "image_level2/soal5/no_1_benar_b.png",
+      "image_level2/soal5/no_1_benar_c.png",
+      "image_level2/soal5/no_1_salah_a.png"
+    ],
+    validImageOrder: [
+      "no_1_benar_a.png",
+      "no_1_benar_b.png",
+      "no_1_benar_c.png",
+      "no_1_salah_a.png"
+    ],
+    correctIndexToCheck: 4,
+    references: [
+      "image_level2/soal5/no_1_salah_b.png",
+      "image_level2/soal5/no_1_benar_d.png",
+      "image_level2/soal5/no_1_benar_e.png",
+      "image_level2/soal5/no_1_benar_f.png"
+    ]
+  }
+];
+
+let currentLevel = 0;
+let score = 0;
+const scoreDisplay = document.getElementById("score");
+const container = document.getElementById("puzzle-container");
+const soalLabel = document.getElementById("soal-indikator");
+const nextBtn = document.getElementById("next-btn");
+
+function updateScoreDisplay() {
+  scoreDisplay.textContent = `Skor: ${score}`;
+}
+
+function loadLevel(index) {
+  const level = levels[index];
+  container.innerHTML = "";
+  soalLabel.textContent = `Soal ${level.id}`;
+  nextBtn.style.display = "none";
+
+  const puzzleTopHTML = `
+    <div id="puzzle-row">
+      ${level.pieces.map((src, i) => `<img src="${src}" class="piece" draggable="true" data-piece-index="${i}">`).join("")}
+    </div>
+  `;
+  const separatorHTML = `<hr class="separator" />`;
+  const puzzleBottomHTML = `
+    <div id="bottom-section">
+      <div id="drop-left">
+        ${Array(4).fill().map((_, i) => `<div class="drop-slot" data-slot-index="${i}"><span class="slot-label">Slot${i + 1}</span></div>`).join("")}
+      </div>
+      <div id="fixed-right">
+        ${level.references.map(src => `<img src="${src}" class="extra-image">`).join("")}
+      </div>
+    </div>
+  `;
+  container.innerHTML = puzzleTopHTML + separatorHTML + puzzleBottomHTML;
+  activateDragDrop(level);
+  enableTapToMove();
+  updateUsedStatus();
+}
+
+function activateDragDrop(level) {
+  let draggedSrc = null;
+  let draggedFrom = null;
+  let slotAsal = null;
+
+  // Drag dari gambar atas (piece)
+  document.querySelectorAll(".piece").forEach((img) => {
+    img.addEventListener("dragstart", e => {
+      draggedSrc = img.src;
+      draggedFrom = "top";
+      slotAsal = null;
+    });
+  });
+
+  // Drag dari slot bawah (gambar yang sudah di-drop)
+  document.querySelectorAll(".drop-slot").forEach((slot) => {
+    slot.addEventListener("dragstart", function(e){
+      const img = slot.querySelector("img");
+      if(img){
+        draggedSrc = img.src;
+        draggedFrom = "slot";
+        slotAsal = slot;
+      }
+    });
+
+    slot.addEventListener("dragover", e => e.preventDefault());
+    slot.addEventListener("dragenter", () => slot.classList.add("highlight"));
+    slot.addEventListener("dragleave", () => slot.classList.remove("highlight"));
+
+    slot.addEventListener("drop", e => {
+      e.preventDefault();
+      slot.classList.remove("highlight");
+
+      // Jika ada gambar di slot yang di-drop, hapus dulu
+      const existingImg = slot.querySelector("img");
+      if (existingImg) slot.removeChild(existingImg);
+
+      // Jika drag dari slot lain, hapus gambar dari slot asal
+      if (draggedFrom === "slot" && slotAsal && slotAsal !== slot) {
+        const imgAsal = slotAsal.querySelector("img");
+        if (imgAsal) slotAsal.removeChild(imgAsal);
+        slotAsal.classList.remove("filled");
+      }
+
+      // Tambahkan gambar ke slot sekarang
+      if (draggedSrc) {
+        const newImg = document.createElement("img");
+        newImg.src = draggedSrc;
+        newImg.className = "dropped";
+        newImg.setAttribute("draggable", "true");
+        newImg.addEventListener("dragstart", function(e) {
+          draggedSrc = newImg.src;
+          draggedFrom = "slot";
+          slotAsal = slot;
+        });
+        slot.appendChild(newImg);
+        slot.classList.add("filled");
+        const label = slot.querySelector(".slot-label");
+        if (label) label.remove();
+      }
+
+      updateUsedStatus();
+
+      draggedSrc = null;
+      draggedFrom = null;
+      slotAsal = null;
+
+      cekKondisiSelesai(level, document.querySelectorAll(".drop-slot"));
+    });
+  });
+}
+
+function updateUsedStatus() {
+  const atasImgs = Array.from(document.querySelectorAll(".piece"));
+  const dipakaiSrc = Array.from(document.querySelectorAll(".drop-slot img")).map(img => img && img.src);
+  atasImgs.forEach(img => {
+    if (dipakaiSrc.includes(img.src)) {
+      img.classList.add("used");
+    } else {
+      img.classList.remove("used");
+    }
+  });
+}
+
+function cekKondisiSelesai(level, dropSlots) {
+  const namaGambar = [...dropSlots].map(slot => {
+    const img = slot.querySelector("img");
+    return img ? img.src.split("/").pop() : null;
+  });
+
+  const semuaTerisi = namaGambar.every(n => n !== null);
+  if (!semuaTerisi) return;
+
+  const valid = namaGambar[level.correctIndexToCheck] === level.validImageOrder[level.correctIndexToCheck];
+  if (valid) {
+    score += 1;
+    updateScoreDisplay();
+
+    if (level.id === 5) {
+      setTimeout(function(){
+        alert(`🎉 Selamat! Kamu telah menyelesaikan semua soal!\nTotal Skor: ${score}\nLanjut ke soal berikutnya.`);
+        window.location.href = "level3.html";
+      }, 200);
+    } else {
+      alert(`🎉 Soal ${level.id} selesai!\nSkor: ${score}`);
+      nextBtn.textContent = "Lanjut ke Soal Berikutnya";
+      nextBtn.style.display = "block";
+    }
+  } else {
+    alert("Semua slot sudah terisi, tapi posisi kunci tidak benar.");
+  }
+}
+
+nextBtn.addEventListener("click", () => {
+  currentLevel++;
+  loadLevel(currentLevel);
+});
+
+loadLevel(currentLevel);
+updateScoreDisplay();
+
+// === TAP TO MOVE (untuk HP) ===
+
+function enableTapToMove() {
+  let selectedImg = null;
+  let selectedFromSlot = null;
+  // Hapus state tap sebelumnya
+  document.querySelectorAll('.piece').forEach(img => {
+    img.onclick = null;
+    img.classList.remove("selected");
+  });
+  document.querySelectorAll('.drop-slot').forEach(slot => slot.onclick = null);
+
+  // Tap gambar atas
+  document.querySelectorAll('.piece').forEach(img => {
+    img.onclick = function() {
+      if (img.classList.contains("used")) return;
+      // Deselect semua
+      document.querySelectorAll('.piece').forEach(x => x.classList.remove("selected"));
+      selectedImg = img;
+      selectedFromSlot = null;
+      img.classList.add("selected");
+    }
+  });
+
+  // Tap gambar bawah (untuk ambil dari slot dan pindah lagi)
+  document.querySelectorAll('.drop-slot').forEach(slot => {
+    const img = slot.querySelector('img');
+    if (img) {
+      img.onclick = function(e) {
+        e.stopPropagation();
+        // Deselect semua
+        document.querySelectorAll('.piece').forEach(x => x.classList.remove("selected"));
+        selectedImg = img;
+        selectedFromSlot = slot;
+        img.classList.add("selected");
+      }
+    }
+  });
+
+  // Tap slot tujuan
+  document.querySelectorAll('.drop-slot').forEach(slot => {
+    slot.onclick = function() {
+      if (!selectedImg) return;
+      // Kalau slot ada gambar dan kita pilih gambar atas, ganti gambarnya
+      const old = slot.querySelector('img');
+      if (old) slot.removeChild(old);
+
+      // Kalau dari slot lain, hapus dari slot asal
+      if (selectedFromSlot && selectedFromSlot !== slot) {
+        const imgAsal = selectedFromSlot.querySelector('img');
+        if (imgAsal) selectedFromSlot.removeChild(imgAsal);
+        selectedFromSlot.classList.remove('filled');
+      }
+      // Masukkan ke slot
+      const newImg = document.createElement('img');
+      newImg.src = selectedImg.src;
+      newImg.className = "dropped";
+      newImg.setAttribute("draggable", "true");
+      slot.appendChild(newImg);
+      slot.classList.add("filled");
+      const label = slot.querySelector(".slot-label");
+      if (label) label.remove();
+
+      // Reset state
+      document.querySelectorAll('.piece').forEach(x => x.classList.remove("selected"));
+      selectedImg = null;
+      selectedFromSlot = null;
+      enableTapToMove();
+      updateUsedStatus();
+      cekKondisiSelesai(levels[currentLevel], document.querySelectorAll('.drop-slot'));
+    };
+  });
+}
+</script>
+</body>
+</html>
