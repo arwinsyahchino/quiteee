@@ -3,75 +3,89 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Loading… Hacker Mode</title>
+  <title>Hacker Ninja Eyes</title>
   <style>
     body{
       margin:0; padding:0;
       background:#000;
-      color:#00ff00;
+      color:#ff0000;
       font-family: "Courier New", monospace;
       display:flex; align-items:center; justify-content:center;
       height:100vh; overflow:hidden;
-    }
-    .stage{
-      text-align:center;
+      flex-direction:column;
     }
     .hacker-text{
       font-size:2em;
       font-weight:bold;
-      text-shadow:0 0 8px #00ff00;
-      animation: blink 1s infinite;
+      text-shadow:0 0 12px #ff0000;
+      animation: blinkText 1s infinite;
+      margin-bottom:40px;
     }
-    @keyframes blink{ 0%,49%{opacity:1;} 50%,100%{opacity:0.2;} }
+    @keyframes blinkText{ 0%,49%{opacity:1;} 50%,100%{opacity:0.3;} }
 
-    /* Loader manusia berjalan */
-    .character{
-      width:150px;
-      margin:40px auto;
-      filter: drop-shadow(0 0 6px #00ff00);
+    .eye-container{
+      position:relative;
+      width:240px; height:100px;
+      display:flex; justify-content:space-between;
     }
-    .leg-left{ transform-origin: 90px 150px; animation: walk 0.8s ease-in-out infinite; }
-    .leg-right{ transform-origin: 90px 150px; animation: walk 0.8s ease-in-out infinite reverse; }
-    .arm-left{ transform-origin: 92px 116px; animation: swing 0.8s ease-in-out infinite; }
-    .arm-right{ transform-origin: 92px 116px; animation: swing 0.8s ease-in-out infinite reverse; }
-    @keyframes walk{ 0%,100%{ transform: rotate(18deg) } 50%{ transform: rotate(-18deg) } }
-    @keyframes swing{ 0%,100%{ transform: rotate(-14deg) } 50%{ transform: rotate(14deg) } }
+    .eye{
+      position:relative;
+      width:100px; height:60px;
+      background:#000;
+      border:4px solid #ff0000;
+      border-radius:50% / 60%;
+      overflow:hidden;
+      box-shadow:0 0 20px #ff0000;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .pupil{
+      width:20px; height:20px;
+      background:#ff0000;
+      border-radius:50%;
+      animation: pupilGlow 2s infinite;
+    }
+    @keyframes pupilGlow{
+      0%,100%{ box-shadow:0 0 6px #ff0000; }
+      50%{ box-shadow:0 0 18px #ff0000; }
+    }
 
-    .flag > path{ fill:#00ff00; animation: wave 0.7s ease-in-out infinite; }
-    @keyframes wave{ 0%{ transform:skewX(4deg);} 50%{ transform:skewX(-4deg);} 100%{ transform:skewX(4deg);} }
+    .eyelid{
+      position:absolute;
+      width:100%; height:100%;
+      top:0; left:0;
+      background:#000;
+      animation: blinkEye 4s infinite;
+      transform-origin: top;
+    }
+    @keyframes blinkEye{
+      0%,92%,100%{ transform:scaleY(0); }
+      95%{ transform:scaleY(1); }
+    }
+
+    /* Ninja mask effect */
+    .eye::before{
+      content:"";
+      position:absolute;
+      top:-20px; left:-20px;
+      width:140%; height:140%;
+      border-top:12px solid #ff0000;
+      border-bottom:12px solid #ff0000;
+      transform:skewY(-10deg);
+      pointer-events:none;
+    }
   </style>
 </head>
 <body>
-  <div class="stage">
-    <div class="hacker-text">WE ARE HACKER</div>
-    <svg class="character" viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg">
-      <!-- Flag pole -->
-      <g>
-        <rect x="124" y="36" width="6" height="94" rx="3" fill="#00ff00" />
-        <g class="flag">
-          <path d="M128,42 L200,52 L200,90 L128,74 Z" />
-        </g>
-      </g>
-
-      <!-- Body -->
-      <g class="body" transform="translate(70,56)">
-        <rect x="28" y="22" width="28" height="44" rx="8" fill="#00ff00"/>
-        <rect x="40" y="14" width="8" height="10" rx="3" fill="#00ff00"/>
-        <circle cx="44" cy="10" r="10" fill="#00ff00"/>
-        <g class="arm-left">
-          <rect x="12" y="30" width="24" height="8" rx="4" fill="#00ff00"/>
-        </g>
-        <g class="arm-right">
-          <rect x="48" y="30" width="24" height="8" rx="4" fill="#00ff00"/>
-        </g>
-        <g class="leg-left">
-          <rect x="28" y="64" width="10" height="26" rx="4" fill="#00ff00"/>
-        </g>
-        <g class="leg-right">
-          <rect x="44" y="64" width="10" height="26" rx="4" fill="#00ff00"/>
-        </g>
-      </g>
-    </svg>
+  <div class="hacker-text">WE ARE HACKER</div>
+  <div class="eye-container">
+    <div class="eye left">
+      <div class="pupil"></div>
+      <div class="eyelid"></div>
+    </div>
+    <div class="eye right">
+      <div class="pupil"></div>
+      <div class="eyelid"></div>
+    </div>
   </div>
 </body>
 </html>
